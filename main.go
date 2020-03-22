@@ -2,13 +2,17 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/rest-api/core"
 	"github.com/rest-api/memory"
 )
 
-var storage memory.CodeStorage
+var storage = memory.NewCodeStorage(map[string]core.Code{
+	"123": core.Code{ID: "123", Source: "print('Anton')", Language: "python", Date: time.Now()},
+	"321": core.Code{ID: "321", Source: "cout << endl", Language: "c++", Date: time.Now()},
+})
 
 func main() {
 	e := echo.New()
@@ -16,6 +20,7 @@ func main() {
 	e.GET("/codes/:id", Get)
 	e.GET("/codes", GetAll)
 	e.POST("/codes", Add)
+	e.DELETE("/codes/:id", Delete)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
@@ -48,9 +53,18 @@ func Add(c echo.Context) error {
 		return err
 	}
 
-	if err := storage.AddCode(code); err != nil {
+	if err := storage.Add(code); err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusOK, code)
+}
+
+// Delete deletes code snippet from database by its id
+func Delete(c echo.Context) error {
+	if err := storage.Delete(c.Param("id")); err != nil {
+		return err
+	}
+
+	return nil
 }
