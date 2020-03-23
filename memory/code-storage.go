@@ -1,37 +1,67 @@
 package memory
 
 import (
+	"encoding/json"
+
+	"github.com/boltdb/bolt"
 	"github.com/rest-api/core"
 )
 
 // CodeStorage - structer which stores all code snippets
 type codeStorage struct {
-	codes map[string]core.Code
+	bucketName []byte
+	Codes      *bolt.DB
 }
 
 // NewCodeStorage return a void instance of CodeStorage type
-func NewCodeStorage(codes map[string]core.Code) codeStorage {
-	return codeStorage{codes}
+func NewCodeStorage(bucketName []byte) codeStorage {
+	return codeStorage{bucketName: bucketName}
 }
 
 // Get returns code object by its id if it exists otherwise it returns DoesNotExist error
 func (cs *codeStorage) Get(id string) (core.Code, error) {
-	if _, ok := cs.codes[id]; !ok {
-		return core.Code{}, core.CodeDoesNotExist.ErrorMessage
+	code := core.Code{}
+	err := cs.Codes.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(cs.bucketName)
+
+		tmp := b.Get([]byte(id))
+
+		if tmp == nil {
+			return core.CodeDoesNotExist.ErrorMessage
+		}
+
+		return json.Unmarshal(tmp, &code)
+	})
+
+	if err != nil {
+		return code, err
 	}
 
-	return cs.codes[id], nil
+	return code, nil
 }
 
 // GetAll returns slice of all codes if storage has more than zero objects otherwise it returns ListEmpty error
 func (cs *codeStorage) GetAll() ([]core.Code, error) {
 	result := make([]core.Code, 0)
 
-	for _, code := range cs.codes {
-		result = append(result, code)
-	}
+	err := cs.Codes.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(cs.bucketName)
 
-	return result, nil
+		err := b.ForEach(func(key []byte, value []byte) error {
+			var tmp core.Code
+			if err := json.Unmarshal(value, &tmp); err != nil {
+				return err
+			}
+
+			result = append(result, tmp)
+
+			return nil
+		})
+
+		return err
+	})
+
+	return result, err
 }
 
 // Add adds new code snippet to database
@@ -40,16 +70,27 @@ func (cs *codeStorage) Add(code *core.Code) error {
 		return core.UnsupportedJSON.ErrorMessage
 	}
 
-	cs.codes[code.ID] = core.NewCode(code)
-	return nil
+	return cs.Codes.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(cs.bucketName)
+
+		code := core.NewCode(code)
+
+		id := code.ID
+		converted, err := json.Marshal(code)
+
+		if err != nil {
+			return err
+		}
+
+		return b.Put([]byte(id), converted)
+	})
 }
 
 // Delete deletes code from database by its id
 func (cs *codeStorage) Delete(id string) error {
-	if _, ok := cs.codes[id]; !ok {
-		return core.CodeDoesNotExist.ErrorMessage
-	}
+	return cs.Codes.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(cs.bucketName)
 
-	delete(cs.codes, id)
-	return nil
+		return b.Delete([]byte(id))
+	})
 }

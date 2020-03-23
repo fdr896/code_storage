@@ -1,21 +1,28 @@
 package main
 
 import (
+	"log"
 	"net/http"
-	"time"
 
+	"github.com/boltdb/bolt"
 	"github.com/labstack/echo"
 	"github.com/rest-api/core"
 	"github.com/rest-api/memory"
 )
 
-var storage = memory.NewCodeStorage(map[string]core.Code{
-	"123": core.Code{ID: "123", Source: "print('Anton')", Language: "python", Date: time.Now()},
-	"321": core.Code{ID: "321", Source: "cout << endl", Language: "c++", Date: time.Now()},
-})
+var storage = memory.NewCodeStorage([]byte("CodeStorage"))
 
 func main() {
 	e := echo.New()
+
+	db, err := bolt.Open("CodeStore.db", 0060, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	storage.Codes = db
+	defer db.Close()
 
 	e.GET("/codes/:id", Get)
 	e.GET("/codes", GetAll)
