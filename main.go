@@ -30,7 +30,7 @@ func Get(c echo.Context) error {
 	code, err := storage.Get(c.Param("id"))
 
 	if err != nil {
-		return err
+		return c.String(http.StatusNotFound, err.Error())
 	}
 	return c.JSON(http.StatusOK, code)
 }
@@ -54,16 +54,16 @@ func Add(c echo.Context) error {
 	}
 
 	if err := storage.Add(code); err != nil {
-		return err
+		return c.String(http.StatusNotAcceptable, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, code)
+	return c.JSON(http.StatusCreated, code)
 }
 
 // Delete deletes code snippet from database by its id
 func Delete(c echo.Context) error {
 	if err := storage.Delete(c.Param("id")); err != nil {
-		return err
+		return c.String(http.StatusNotFound, err.Error())
 	}
 
 	return nil

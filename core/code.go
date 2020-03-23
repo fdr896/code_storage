@@ -1,9 +1,15 @@
 package core
 
 import (
+	"errors"
 	"time"
 
 	"github.com/rs/xid"
+)
+
+var (
+	CodeDoesNotExist = errors.New("Code with required id does not exist")
+	UnsupportedJSON  = errors.New("Received JSON doesn't not satisfies to requested conditions")
 )
 
 // Code - structer which contains information about particular code snippet
@@ -15,9 +21,15 @@ type Code struct {
 	Tags     []string  `json:"tags,omitempty"`
 }
 
+// NewCode adds id and date to instance of Code and returns it
 func NewCode(code *Code) Code {
 	code.ID = xid.New().String()
 	code.Date = time.Now()
 
 	return *code
+}
+
+// CheckCode checks if Source and language filed of Code instance are not empty
+func CheckCode(code *Code) bool {
+	return code.Language != "" && code.Source != ""
 }
