@@ -1,8 +1,6 @@
 package memory
 
 import (
-	"fmt"
-
 	"github.com/rest-api/core"
 )
 
@@ -19,7 +17,7 @@ func NewCodeStorage(codes map[string]core.Code) codeStorage {
 // Get returns code object by its id if it exists otherwise it returns DoesNotExist error
 func (cs *codeStorage) Get(id string) (core.Code, error) {
 	if _, ok := cs.codes[id]; !ok {
-		return core.Code{}, core.CodeDoesNotExist
+		return core.Code{}, core.CodeDoesNotExist.ErrorMessage
 	}
 
 	return cs.codes[id], nil
@@ -39,8 +37,7 @@ func (cs *codeStorage) GetAll() ([]core.Code, error) {
 // Add adds new code snippet to database
 func (cs *codeStorage) Add(code *core.Code) error {
 	if !core.CheckCode(code) {
-		fmt.Println("ERRor")
-		return core.UnsupportedJSON
+		return core.UnsupportedJSON.ErrorMessage
 	}
 
 	cs.codes[code.ID] = core.NewCode(code)
@@ -50,7 +47,7 @@ func (cs *codeStorage) Add(code *core.Code) error {
 // Delete deletes code from database by its id
 func (cs *codeStorage) Delete(id string) error {
 	if _, ok := cs.codes[id]; !ok {
-		return core.CodeDoesNotExist
+		return core.CodeDoesNotExist.ErrorMessage
 	}
 
 	delete(cs.codes, id)

@@ -2,14 +2,21 @@ package core
 
 import (
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/rs/xid"
 )
 
+// Error represents a type with which errors in http requests handle
+type Error struct {
+	StatusCode   int
+	ErrorMessage error
+}
+
 var (
-	CodeDoesNotExist = errors.New("Code with required id does not exist")
-	UnsupportedJSON  = errors.New("Received JSON doesn't not satisfies to requested conditions")
+	CodeDoesNotExist = Error{http.StatusNotFound, errors.New("Code with required id does not exist")}
+	UnsupportedJSON  = Error{http.StatusNotAcceptable, errors.New("Received JSON doesn't not satisfies to requested conditions")}
 )
 
 // Code - structer which contains information about particular code snippet
