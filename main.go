@@ -1,10 +1,8 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
-	"github.com/boltdb/bolt"
 	"github.com/labstack/echo"
 	"github.com/rest-api/core"
 	"github.com/rest-api/memory"
@@ -15,21 +13,13 @@ var storage = memory.NewCodeStorage([]byte("CodeStorage"))
 func main() {
 	e := echo.New()
 
-	db, err := bolt.Open("CodeStore.db", 0060, nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	storage.Codes = db
-	defer db.Close()
-
 	e.GET("/codes/:id", Get)
 	e.GET("/codes", GetAll)
 	e.POST("/codes", Add)
 	e.DELETE("/codes/:id", Delete)
 
 	e.Logger.Fatal(e.Start(":8080"))
+	storage.CloseDB()
 }
 
 // Get function handles GET request (return code by its id)
@@ -61,7 +51,10 @@ func Add(c echo.Context) error {
 	}
 
 	if err := storage.Add(code); err != nil {
-		return c.String(core.UnsupportedJSON.StatusCode, core.UnsupportedJSON.ErrorMessage.Error())
+		if err.Error() == core.CodeDoesNotExist.ErrorMessage.Error() {
+			return c.String(core.UnsupportedJSON.StatusCode, err.Error())
+		}
+		return c.String(http.StatusConflict, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, code)

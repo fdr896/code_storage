@@ -2,6 +2,7 @@ package memory
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/boltdb/bolt"
 	"github.com/rest-api/core"
@@ -15,7 +16,27 @@ type codeStorage struct {
 
 // NewCodeStorage return a void instance of CodeStorage type
 func NewCodeStorage(bucketName []byte) codeStorage {
-	return codeStorage{bucketName: bucketName}
+	db, err := bolt.Open("CodeStorage.db", 0600, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists(bucketName)
+		return err
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return codeStorage{bucketName, db}
+}
+
+// CloseDB closes database
+func (cs *codeStorage) CloseDB() {
+	cs.Codes.Close()
 }
 
 // Get returns code object by its id if it exists otherwise it returns DoesNotExist error
@@ -70,7 +91,7 @@ func (cs *codeStorage) Add(code *core.Code) error {
 		return core.UnsupportedJSON.ErrorMessage
 	}
 
-	return cs.Codes.Update(func(tx *bolt.Tx) error {
+	err := cs.Codes.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(cs.bucketName)
 
 		code := core.NewCode(code)
@@ -84,6 +105,8 @@ func (cs *codeStorage) Add(code *core.Code) error {
 
 		return b.Put([]byte(id), converted)
 	})
+
+	return err
 }
 
 // Delete deletes code from database by its id
