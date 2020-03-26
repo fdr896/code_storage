@@ -1,40 +1,54 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
+	"github.com/code_storage/bolt"
+	"github.com/code_storage/core"
 	"github.com/labstack/echo"
-	"github.com/rest-api/core"
-	"github.com/rest-api/memory"
 )
 
-var storage = memory.NewCodeStorage([]byte("CodeStorage"))
+var (
+	bucketName = []byte("CodeStorage")
+)
 
 func main() {
+	var h Handler
+	if storage, err := bolt.NewCodeStorage(bucketName); err != nil {
+		log.Fatal(err)
+	} else {
+		h.Storage = storage
+	}
+	defer h.Storage.Close()
+
 	e := echo.New()
+	e.GET("/codes/:id", h.Get)
+	e.GET("/codes", h.GetAll)
+	e.POST("/codes", h.Add)
+	e.DELETE("/codes/:id", h.Delete)
 
-	e.GET("/codes/:id", Get)
-	e.GET("/codes", GetAll)
-	e.POST("/codes", Add)
-	e.DELETE("/codes/:id", Delete)
-
-	e.Logger.Fatal(e.Start(":8080"))
-	storage.CloseDB()
+	log.Fatal(e.Start(":8080"))
 }
 
-// Get function handles GET request (return code by its id)
-func Get(c echo.Context) error {
-	code, err := storage.Get(c.Param("id"))
+// Handler handles http request.
+type Handler struct {
+	Storage core.CodeStorage
+}
+
+// Get handles GET request (return code by its id).
+func (h *Handler) Get(c echo.Context) error {
+	code, err := h.Storage.Get(c.Param("id"))
 
 	if err != nil {
-		return c.String(core.CodeDoesNotExist.StatusCode, core.CodeDoesNotExist.ErrorMessage.Error())
+		return echo.NewHTTPError(http.StatusNotFound, core.ErrNotFound)
 	}
 	return c.JSON(http.StatusOK, code)
 }
 
-// GetAll function handles GET request (return all codes)
-func GetAll(c echo.Context) error {
-	codes, err := storage.GetAll()
+// GetAll handles GET request (return all codes).
+func (h *Handler) GetAll(c echo.Context) error {
+	codes, err := h.Storage.GetAll()
 
 	if err != nil {
 		return err
@@ -42,29 +56,29 @@ func GetAll(c echo.Context) error {
 	return c.JSON(http.StatusOK, codes)
 }
 
-// Add adds received code snippet to database
-func Add(c echo.Context) error {
-	code := new(core.Code)
+// Add adds received code snippet to database.
+func (h *Handler) Add(c echo.Context) error {
+	code := &core.Code{}
 
 	if err := c.Bind(code); err != nil {
 		return err
 	}
 
-	if err := storage.Add(code); err != nil {
-		if err.Error() == core.CodeDoesNotExist.ErrorMessage.Error() {
-			return c.String(core.UnsupportedJSON.StatusCode, err.Error())
-		}
-		return c.String(http.StatusConflict, err.Error())
+	if err := code.NewCode(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := h.Storage.Add(code); err != nil {
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, code)
 }
 
-// Delete deletes code snippet from database by its id
-func Delete(c echo.Context) error {
-	if err := storage.Delete(c.Param("id")); err != nil {
-		return c.String(core.CodeDoesNotExist.StatusCode, core.CodeDoesNotExist.ErrorMessage.Error())
+// Delete deletes code snippet from database by its id.
+func (h *Handler) Delete(c echo.Context) error {
+	if err := h.Storage.Delete(c.Param("id")); err != nil {
+		return err
 	}
-
 	return nil
 }

@@ -2,24 +2,19 @@ package core
 
 import (
 	"errors"
-	"net/http"
+	"strings"
 	"time"
 
 	"github.com/rs/xid"
 )
 
-// Error represents a type with which errors in http requests handle
-type Error struct {
-	StatusCode   int
-	ErrorMessage error
-}
-
 var (
-	CodeDoesNotExist = Error{http.StatusNotFound, errors.New("Code with required id does not exist")}
-	UnsupportedJSON  = Error{http.StatusNotAcceptable, errors.New("Received JSON doesn't not satisfies to requested conditions")}
+	ErrNotFound      = errors.New("code was not found")
+	ErrEmptySource   = errors.New("code's source is empty")
+	ErrEmptyLanguage = errors.New("code's language is empty")
 )
 
-// Code - structer which contains information about particular code snippet
+// Code contains information about particular code snippet.
 type Code struct {
 	ID       string    `json:"id,omitempty"`
 	Source   string    `json:"source,omitempty"`
@@ -28,15 +23,29 @@ type Code struct {
 	Tags     []string  `json:"tags,omitempty"`
 }
 
-// NewCode adds id and date to instance of Code and returns it
-func NewCode(code *Code) Code {
+// NewCode adds id and date to instance of Code and returns it.
+func (code *Code) NewCode() error {
+	code.Source = strings.TrimSpace(code.Source)
+	if code.Source == "" {
+		return ErrEmptySource
+	}
+
+	code.Language = strings.TrimSpace(code.Language)
+	if code.Language == "" {
+		return ErrEmptyLanguage
+	}
+
 	code.ID = xid.New().String()
 	code.Date = time.Now()
 
-	return *code
+	return nil
 }
 
-// CheckCode checks if Source and language filed of Code instance are not empty
-func CheckCode(code *Code) bool {
-	return code.Language != "" && code.Source != ""
+// CodeStorage represents storage interface.
+type CodeStorage interface {
+	Get(id string) (*Code, error)
+	GetAll() ([]*Code, error)
+	Add(code *Code) error
+	Delete(id string) error
+	Close()
 }
