@@ -14,8 +14,8 @@ type codeStorage struct {
 }
 
 // NewCodeStorage return a void instance of CodeStorage type
-func NewCodeStorage(bucketName []byte) (core.CodeStorage, error) {
-	db, err := bolt.Open("CodeStorage.db", 0600, nil)
+func NewCodeStorage(bucketName []byte, path string) (core.CodeStorage, error) {
+	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -38,20 +38,17 @@ func (cs *codeStorage) Close() {
 // Get returns code object by its id if it exists otherwise it returns DoesNotExist error
 func (cs *codeStorage) Get(id string) (*core.Code, error) {
 	code := &core.Code{}
-	err := cs.Codes.View(func(tx *bolt.Tx) error {
+	if err := cs.Codes.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(cs.bucketName)
 
 		tmp := b.Get([]byte(id))
-
 		if tmp == nil {
 			return core.ErrNotFound
 		}
 
 		return json.Unmarshal(tmp, &code)
-	})
-
-	if err != nil {
-		return code, err
+	}); err != nil {
+		return nil, err
 	}
 
 	return code, nil
@@ -61,7 +58,7 @@ func (cs *codeStorage) Get(id string) (*core.Code, error) {
 func (cs *codeStorage) GetAll() ([]*core.Code, error) {
 	result := make([]*core.Code, 0)
 
-	err := cs.Codes.View(func(tx *bolt.Tx) error {
+	if err := cs.Codes.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(cs.bucketName)
 
 		err := b.ForEach(func(key []byte, value []byte) error {
@@ -76,9 +73,11 @@ func (cs *codeStorage) GetAll() ([]*core.Code, error) {
 		})
 
 		return err
-	})
+	}); err != nil {
+		return nil, err
+	}
 
-	return result, err
+	return result, nil
 }
 
 // Add adds new code snippet to database

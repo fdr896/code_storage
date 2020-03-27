@@ -11,11 +11,12 @@ import (
 
 var (
 	bucketName = []byte("CodeStorage")
+	path       = "codestorage.db"
 )
 
 func main() {
 	var h Handler
-	if storage, err := bolt.NewCodeStorage(bucketName); err != nil {
+	if storage, err := bolt.NewCodeStorage(bucketName, path); err != nil {
 		log.Fatal(err)
 	} else {
 		h.Storage = storage
@@ -39,20 +40,20 @@ type Handler struct {
 // Get handles GET request (return code by its id).
 func (h *Handler) Get(c echo.Context) error {
 	code, err := h.Storage.Get(c.Param("id"))
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, core.ErrNotFound)
 	}
+
 	return c.JSON(http.StatusOK, code)
 }
 
 // GetAll handles GET request (return all codes).
 func (h *Handler) GetAll(c echo.Context) error {
 	codes, err := h.Storage.GetAll()
-
 	if err != nil {
 		return err
 	}
+
 	return c.JSON(http.StatusOK, codes)
 }
 
