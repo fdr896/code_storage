@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/boltdb/bolt"
-	"github.com/code_storage/core"
+	"github.com/fdr896/code_storage/core"
 )
 
 // CodeStorage - structer which stores all code snippets

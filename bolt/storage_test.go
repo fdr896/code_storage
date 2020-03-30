@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/code_storage/core"
+	"github.com/fdr896/code_storage/core"
 )
 
 var (
 	bucketName = []byte("tmp")
-	path       = "../tmp/TemporaryStorage.db"
+	path       = "../tmp/TemporaryStorageBolt.db"
 	randomID   = "random ID"
 	tmpCode    = &core.Code{
 		ID:       "test id",
@@ -93,7 +93,7 @@ func TestGetAll(t *testing.T) {
 	receivedCodeList, _ := cs.GetAll()
 
 	if len(receivedCodeList) != len(tmpCodeList) {
-		t.Errorf("received and template lists are not equal")
+		t.Errorf("received and template lists are not equal because of different length: %d and %d", len(receivedCodeList), len(tmpCodeList))
 	}
 
 	sort.Slice(receivedCodeList, func(i, j int) bool {

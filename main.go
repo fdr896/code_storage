@@ -4,9 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/code_storage/bolt"
-	"github.com/code_storage/core"
+	"github.com/fdr896/code_storage/bolt"
+	"github.com/fdr896/code_storage/core"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 var (
@@ -24,6 +25,8 @@ func main() {
 	defer h.Storage.Close()
 
 	e := echo.New()
+	e.Use(middleware.CORS())
+
 	e.GET("/codes/:id", h.Get)
 	e.GET("/codes", h.GetAll)
 	e.POST("/codes", h.Add)
