@@ -51,7 +51,7 @@
     async function HasPassword(user) {
         const response = await fetch($API_URL + 'user/' + user);
 
-        return await response.json();
+        return response.json();
     }
     let promise = HasPassword('admin');
 
@@ -67,7 +67,7 @@
             })
         });
 
-        return await response.json();
+        return response.json();
     }
 
     async function VerifyPassword(password) {
@@ -81,7 +81,7 @@
             })
         });
 
-        return await response.json();
+        return response.json();
     }
 </script>
 
@@ -122,7 +122,7 @@
             autocomplete="off"
             type="password"
             maxlength="30"
-            placeholder="set password for your account"
+            placeholder="type new password here"
             bind:value={inputPassword}
             on:keydown={GoToSignUp}
             />
