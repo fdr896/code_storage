@@ -51,7 +51,7 @@
     async function HasPassword(user) {
         const response = await fetch($API_URL + 'user/' + user);
 
-        return response.json();
+        return await response.json();
     }
     let promise = HasPassword('admin');
 
@@ -67,7 +67,7 @@
             })
         });
 
-        return response.json();
+        return await response.json();
     }
 
     async function VerifyPassword(password) {
@@ -81,7 +81,7 @@
             })
         });
 
-        return response.json();
+        return await response.json();
     }
 </script>
 
