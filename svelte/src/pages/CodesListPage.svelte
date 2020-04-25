@@ -15,12 +15,15 @@
                 return i.date < j.date;
             });
 
+            codes.forEach(el => {
+                console.log(el);
+            })
+
             return codes;
         } else {
             throw new Error(codes);
         }
     }
-    let promise = GetAllCodes();
 
 
     function DeleteCode(id) {
@@ -57,7 +60,7 @@
 </script>
 
 {#if $mainPageMode === 'Codes List'}
-    {#await promise}
+    {#await GetAllCodes()}
         <Spinner />
     {:then codes}
         {#if codes.length}
