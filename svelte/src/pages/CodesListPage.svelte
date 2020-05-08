@@ -1,5 +1,5 @@
 <script>
-    import { API_URL, mainPageMode } from '../stores.js';
+    import { API_URL, mainPageMode, promise } from '../stores.js';
 
     import ShowCode from './ShowCodePage.svelte';
     import EditCode from './EditCodePage.svelte';
@@ -12,9 +12,10 @@
 
         if (response.ok) {
             codes.sort((i, j) => {
-                return i.date < j.date;
+                return i.id > j.id;
             });
 
+            console.log('***CODES LIST***');
             codes.forEach(el => {
                 console.log(el);
             })
@@ -24,21 +25,22 @@
             throw new Error(codes);
         }
     }
+    promise.set(GetAllCodes());
 
 
     function DeleteCode(id) {
         fetch($API_URL + 'codes/' + id, {
-            method: 'Delete'
+            method: 'DELETE'
         })
         .then(response => {
             if (!response.ok) {
                 console.log(response.statusText);
             } else {
-                promise = GetAllCodes();
+                promise.set(GetAllCodes());
             }
         })
         .catch(error => {
-            alert(error);
+            alert(error.message);
         });
     }
 
@@ -60,7 +62,7 @@
 </script>
 
 {#if $mainPageMode === 'Codes List'}
-    {#await GetAllCodes()}
+    {#await $promise}
         <Spinner />
     {:then codes}
         {#if codes.length}
@@ -133,5 +135,5 @@
 {:else if $mainPageMode === 'Show Code'}
     <ShowCode id={codeID} />
 {:else if $mainPageMode === 'Edit Code'}
-    <EditCode id={codeID} />
+    <EditCode id={codeID} GetAllCodes={GetAllCodes} />
 {/if}

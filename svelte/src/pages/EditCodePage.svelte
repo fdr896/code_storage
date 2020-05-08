@@ -1,8 +1,9 @@
 <script>
-    import { API_URL, languageList, mainPageMode } from '../stores.js';
+    import { API_URL, languageList, mainPageMode, promise } from '../stores.js';
 
 
     export let id;
+    export let GetAllCodes;
 
     let code;
     let language, source, description;
@@ -47,6 +48,8 @@
         })
         .then(response => {
             console.log(response);
+
+            promise.set(GetAllCodes());
             mainPageMode.set('Codes List');
         }) 
         .catch(error => {

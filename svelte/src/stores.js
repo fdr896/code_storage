@@ -1,6 +1,7 @@
 import { writable, readable } from 'svelte/store';
 import { cpp, python, javascript, go, java, plaintext } from 'svelte-highlight/languages';
 
+export let promise = writable(1);
 export let userState = writable(false)
 export let mainPageMode = writable("Codes List")
 
