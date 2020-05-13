@@ -3,7 +3,6 @@
 
     import Highlight from 'svelte-highlight';
     import { github } from 'svelte-highlight/styles';
-    import { cpp, go } from 'svelte-highlight/languages';
 
     import EditCode from './EditCodePage.svelte';
     import Spinner from '../Spinner.svelte';

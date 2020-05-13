@@ -38,7 +38,7 @@
 <style>
     #description, #language {
         display: inline-block;
-        margin-right: 70px;
+        margin-right: 190px;
      }
 
     .code-form {
