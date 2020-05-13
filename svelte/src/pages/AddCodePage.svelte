@@ -42,13 +42,13 @@
      }
 
     .code-form {
-        background: #E0E0E0;
+        background: #F0F0F0;
         width: 850px;
         height: 600px;
         display: block;
         margin-bottom: 10px;
         border-radius: 5px;
-        border: 1px solid #ccc;
+        border: 1px solid #bbb;
         box-shadow: 1px 1px 1px #999;
     }
 </style>

@@ -82,7 +82,9 @@
                     line-height: 65px;
                     padding-left: 10px;
                     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
                     font-family: Arial, Helvetica, sans-serif;
+                    font-weight: 500;
                 }
 
                 span:hover {
@@ -95,9 +97,13 @@
                 }
 
                 .delete-button {
-                    margin-right: 140px;
+                    margin-right: 120px;
                     height: 30px;
                     margin-top: 20px;
+                }
+
+                .delete-button:hover {
+                    cursor: pointer;
                 }
             </style>
 
@@ -111,10 +117,13 @@
                     on:click={() => RedirectToEditCode(code.id)}
                     >{handleText(code.description)}</span>
 
-                    <button
+                    <img
+                    src="img/delete-circle48.png"
+                    alt="delete code"
+                    title="wanna delete this code?"
                     class="delete-button"
                     on:click={() => DeleteCode(code.id)}
-                    >Delete</button>
+                    />
                 {/each}
             </div>
         {:else}

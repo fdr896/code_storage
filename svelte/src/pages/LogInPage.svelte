@@ -102,9 +102,12 @@
             style="margin-top: 0;"
             for="password-field"
             >Password:</label>
+
+            <!-- svelte-ignore a11y-autofocus -->
             <input
             id="password-field"
             autocomplete="off"
+            autofocus
             type="password"
             maxlength="30"
             placeholder="Password"
@@ -117,9 +120,12 @@
             <label
             for="password-field"
             >Password:</label>
+
+            <!-- svelte-ignore a11y-autofocus -->
             <input
             id="password-field"
             autocomplete="off"
+            autofocus
             type="password"
             maxlength="30"
             placeholder="type new password here"
