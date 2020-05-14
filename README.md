@@ -18,7 +18,7 @@ Web storage for your code snippets.
     
     Windows
     - tap on `build.bat` and wait till terminal close (probably some pop-up window will appear - in that case just give them what they want (access to your files or maybe some money:dollar::smiling_imp:)
-    - tap on `run.bat
+    - tap on `run.bat`
     - wait when browser opens (if you see some erros instead of password page just reload your page several (not bigger than 7 millions:smile:) times
     - add your first code!
     
