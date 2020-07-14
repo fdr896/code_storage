@@ -23,10 +23,10 @@ Web storage for your code snippets.
     - add your first code!
     
     Mac OS
-    - TODO (but you can try same approach as in Linux)
+    - use same approach as in Linux
   
   ### Manual installation
-  - Install latest versions of [golang][https://golang.org/] and [npm](https://www.npmjs.com/) on your computer
+  - Install latest versions of [golang](https://golang.org/) and [npm](https://www.npmjs.com/) on your computer
   - Clone this repo and open it's main directory in terminal
   - `cd rest-api` and run `go run .` (some advertisments and server message will appear on your screen)
   - open new tab or new terminal and follow same steps as mentioned above but go to `svelte` directory instead of `rest-api`
